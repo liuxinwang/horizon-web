@@ -10,7 +10,7 @@ export function getInspList (parameter) {
 
 export function getInspDetail (parameter) {
   return request({
-    url: '/inspection' + parameter,
+    url: '/inspection/' + parameter,
     method: 'get',
     params: parameter
   })

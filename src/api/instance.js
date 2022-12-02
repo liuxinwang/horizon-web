@@ -8,6 +8,14 @@ export function getInstList (parameter) {
   })
 }
 
+export function getInstInfo (parameter) {
+  return request({
+    url: '/instance/' + parameter,
+    method: 'get',
+    params: parameter
+  })
+}
+
 // InstId == 0 add     post
 // InstId != 0 update  put
 export function saveInst (parameter) {

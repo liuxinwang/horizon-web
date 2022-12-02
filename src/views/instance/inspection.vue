@@ -46,7 +46,7 @@
         </span>
       </s-table>
 
-      <create-form
+      <inspection-detail-modal
         ref="createModal"
         :visible="visible"
         :loading="confirmLoading"
@@ -62,7 +62,7 @@
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
 import { getInspList } from '@/api/inspection'
-import CreateForm from './modules/CreateForm'
+import InspectionDetailModal from './modules/InspectionDetailModal'
 
 const columns = [
   {
@@ -106,7 +106,7 @@ export default {
   components: {
     STable,
     Ellipsis,
-    CreateForm
+    InspectionDetailModal
   },
   data () {
     this.columns = columns
@@ -144,6 +144,16 @@ export default {
       this.queryParam = {
         date: moment(new Date())
       }
+    },
+    handleDetail (val) {
+      this.mdl = val
+      this.visible = true
+    },
+    handleOk () {
+      this.visible = false
+    },
+    handleCancel () {
+      this.visible = false
     }
   }
 }
