@@ -39,6 +39,13 @@
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
+        <span slot="Level" slot-scope="Level">
+          <a-tag
+            :color="Level === 'CRITICAL' ? 'red' : Level === 'RISKY' ? 'orange' : Level === 'SUBOPTIMAL' ? 'blue' : Level === 'HEALTHY' ? 'green' : 'pink'"
+          >
+            {{ Level | levelName }}
+          </a-tag>
+        </span>
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="handleDetail(record)">查看</a>
@@ -87,7 +94,8 @@ const columns = [
   },
   {
     title: '等级',
-    dataIndex: 'Leve'
+    dataIndex: 'Level',
+    scopedSlots: { customRender: 'Level' }
   },
   {
     title: '创建时间',
@@ -131,6 +139,20 @@ export default {
     }
   },
   filters: {
+    levelName (level) {
+      switch (level) {
+        case 'CRITICAL':
+          return '高危'
+        case 'RISKY':
+          return '危险'
+        case 'SUBOPTIMAL':
+          return '亚健康'
+        case 'HEALTHY':
+          return '健康'
+        default:
+          return level
+      }
+    }
   },
   created () {
   },

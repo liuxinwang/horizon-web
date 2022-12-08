@@ -6,7 +6,9 @@
       <a href="https://www.github.com/sendya/" target="_blank">@Sendya</a> -->
     </template>
     <template v-slot:copyright>
-      <a href="https://github.com/liuxinwang/horizon" target="_blank">Horizon v0.3.0</a>
+      <a href="https://github.com/liuxinwang/horizon" target="_blank">
+        GitHub Horizon v0.3.1
+      </a>
     </template>
   </global-footer>
 </template>
