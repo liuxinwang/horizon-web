@@ -5,55 +5,29 @@
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="6" :sm="24">
-              <a-form-item label="实例ID">
-                <a-input v-model="queryParam.InstId" placeholder=""/>
+              <a-form-item label="用户名">
+                <a-input v-model="queryParam.userName" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
-              <a-form-item label="实例名称">
-                <a-input v-model="queryParam.Name" placeholder=""/>
+              <a-form-item label="用户昵称">
+                <a-input v-model="queryParam.nickName" placeholder=""/>
               </a-form-item>
             </a-col>
-            <a-col :md="4" :sm="24">
-              <a-form-item label="实例状态">
-                <a-select v-model="queryParam.Status" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="Start">启动</a-select-option>
-                  <a-select-option value="Stop">停止</a-select-option>
-                  <a-select-option value="Running">运行中</a-select-option>
-                  <a-select-option value="Error">异常</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <template v-if="advanced">
-              <a-col :md="6" :sm="24">
-                <a-form-item label="实例IP">
-                  <a-input v-model="queryParam.Ip" placeholder=""/>
-                </a-form-item>
-              </a-col>
-            </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
                 <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
                 <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">重置</a-button>
-                <a @click="toggleAdvanced" style="margin-left: 8px">
-                  {{ advanced ? '收起' : '展开' }}
-                  <a-icon :type="advanced ? 'up' : 'down'"/>
-                </a>
               </span>
             </a-col>
           </a-row>
         </a-form>
       </div>
 
-      <div class="table-operator">
-        <a-button v-action:add type="primary" icon="plus" @click="handleAdd">新建</a-button>
-      </div>
-
       <s-table
         ref="table"
         size="default"
-        rowKey="ID"
+        rowKey="id"
         :columns="columns"
         :data="loadData"
         showPagination="auto"
@@ -72,6 +46,9 @@
               </a>
               <a-menu slot="overlay">
                 <a-menu-item>
+                  <a v-action:resetPassword @click="handleResetPwd(record)">重置密码</a>
+                </a-menu-item>
+                <a-menu-item>
                   <a v-action:delete @click="handleDelete(record)">删除</a>
                 </a-menu-item>
               </a-menu>
@@ -88,15 +65,24 @@
         @cancel="handleCancel"
         @ok="handleOk"
       />
+
+      <reset-pwd-form
+        ref="resetPwdModal"
+        :visible="resetPwdVisible"
+        :loading="resetPwdConfirmLoading"
+        :model="resetPwdMdl"
+        @cancel="handleResetPwdCancel"
+        @ok="handleResetPwdOk"
+      />
     </a-card>
   </page-header-wrapper>
 </template>
 
 <script>
-import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getInstList, saveInst, deleteInst } from '@/api/instance'
+import { getUserList, saveUser, deleteUser, resetPassword } from '@/api/user'
 import CreateForm from './modules/CreateForm'
+import ResetPwdForm from './modules/ResetPwdForm'
 
 const columns = [
   {
@@ -104,53 +90,68 @@ const columns = [
     scopedSlots: { customRender: 'serial' }
   },
   {
-    title: '实例ID',
-    dataIndex: 'InstId'
+    title: '用户ID',
+    dataIndex: 'id',
+    colSpan: 0,
+    customRender: (value, row, index) => {
+                const obj = {
+                    children: value,
+                    attrs: {}
+                }
+
+                obj.attrs.colSpan = 0
+                return obj
+            }
   },
   {
-    title: '实例名称',
-    dataIndex: 'Name'
+    title: '用户名',
+    dataIndex: 'userName'
   },
   {
-    title: '实例版本',
-    dataIndex: 'Version'
+    title: '用户昵称',
+    dataIndex: 'nickName'
   },
   {
-    title: '实例角色',
-    dataIndex: 'Role'
+    title: '角色ID',
+    dataIndex: 'roleId',
+    colSpan: 0,
+    customRender: (value, row, index) => {
+                const obj = {
+                    children: value,
+                    attrs: {}
+                }
+
+                obj.attrs.colSpan = 0
+                return obj
+            }
   },
   {
-    title: '实例IP',
-    dataIndex: 'Ip'
+    title: '角色名称',
+    dataIndex: 'roleName'
   },
   {
-    title: '巡检状态',
-    dataIndex: 'InspStatus',
-    scopedSlots: { customRender: 'InspStatus' }
-  },
-  {
-    title: '运行状态',
-    dataIndex: 'Status',
-    scopedSlots: { customRender: 'Status' }
+    title: '状态',
+    dataIndex: 'status',
+    scopedSlots: { customRender: 'status' }
   },
   {
     title: '创建时间',
-    dataIndex: 'CreatedAt'
+    dataIndex: 'createdAt'
   },
   {
     title: '操作',
     dataIndex: 'action',
-    width: '150px',
     scopedSlots: { customRender: 'action' }
   }
 ]
 
 export default {
-  name: 'InstanceList',
+  name: 'User',
   components: {
     STable,
     Ellipsis,
-    CreateForm
+    CreateForm,
+    ResetPwdForm
   },
   data () {
     this.columns = columns
@@ -159,6 +160,10 @@ export default {
       visible: false,
       confirmLoading: false,
       mdl: null,
+      // reset pwd model
+      resetPwdVisible: false,
+      resetPwdConfirmLoading: false,
+      resetPwdMdl: null,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
@@ -166,7 +171,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
-        return getInstList(requestParameters).then(res => {
+        return getUserList(requestParameters).then(res => {
             return res.data
           })
       },
@@ -175,16 +180,22 @@ export default {
     }
   },
   filters: {
+    StatusName (status) {
+      switch (status) {
+        case 'Enabled':
+          return '正常'
+        case 'Disabled':
+          return '禁用'
+        default:
+          return status
+      }
+    }
   },
   created () {
   },
   computed: {
   },
   methods: {
-    handleAdd () {
-      this.mdl = null
-      this.visible = true
-    },
     handleEdit (record) {
       this.visible = true
       this.mdl = { ...record }
@@ -192,13 +203,13 @@ export default {
     handleDelete (record) {
       const that = this
       this.$confirm({
-        title: '确认删除实例' + record.InstId + '/' + record.Name + '?',
+        title: '确认删除用户' + record.UserName + '/' + record.NickName + '?',
         content: '删除后不可恢复',
         okText: '确认',
         okType: 'danger',
         cancelText: '取消 ',
         onOk () {
-          return deleteInst(record.ID).then(res => {
+          return deleteUser(record.id).then(res => {
             if (res.code === 1) {
               that.$refs.table.refresh()
               that.$message.info('删除成功')
@@ -214,9 +225,9 @@ export default {
       this.confirmLoading = true
       form.validateFields((errors, values) => {
         if (!errors) {
-          if (values.InstId !== '') {
+          if (values.id !== '') {
             // 修改 e.g.
-            saveInst(values).then(res => {
+            saveUser(values).then(res => {
               if (res.code === 1) {
                 this.visible = false
                 this.confirmLoading = false
@@ -236,23 +247,7 @@ export default {
             })
           } else {
             // 新增
-            saveInst(values).then(res => {
-              if (res.code === 1) {
-                this.visible = false
-                this.confirmLoading = false
-                // 重置表单数据
-                form.resetFields()
-                // 刷新表格
-                this.$refs.table.refresh()
-                this.$message.info('新增成功')
-              } else {
-                this.$message.error(res.err)
-              this.confirmLoading = false
-              }
-            }).catch((e) => {
-              console.log(e)
-              this.confirmLoading = false
-            })
+            console.log('insert user')
           }
         } else {
           this.confirmLoading = false
@@ -261,16 +256,43 @@ export default {
     },
     handleCancel () {
       this.visible = false
-      const form = this.$refs.createModal.form
-      form.resetFields() // 清理表单数据（可不做）
     },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
+    handleResetPwd (record) {
+      this.resetPwdVisible = true
+      this.resetPwdMdl = { ...record }
     },
-    resetSearchForm () {
-      this.queryParam = {
-        date: moment(new Date())
-      }
+    handleResetPwdOk () {
+      const form = this.$refs.resetPwdModal.form
+      this.resetPwdConfirmLoading = true
+      form.validateFields((errors, values) => {
+        if (!errors) {
+          // 修改 e.g.
+          values.Password = values.newPassword
+          resetPassword(values).then(res => {
+            if (res.code === 1) {
+              this.resetPwdVisible = false
+              this.resetPwdConfirmLoading = false
+              // 重置表单数据
+              form.resetFields()
+              // 刷新表格
+              this.$refs.table.refresh()
+
+              this.$message.info('重置成功')
+            } else {
+              this.$message.error(res.err)
+              this.resetPwdConfirmLoading = false
+            }
+          }).catch((e) => {
+            console.log(e)
+            this.resetPwdConfirmLoading = false
+          })
+        } else {
+          this.resetPwdConfirmLoading = false
+        }
+      })
+    },
+    handleResetPwdCancel () {
+      this.resetPwdVisible = false
     }
   }
 }

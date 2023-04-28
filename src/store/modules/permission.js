@@ -39,6 +39,7 @@ function hasRole(roles, route) {
 }
 
 function filterAsyncRouter (routerMap, roles) {
+  debugger
   const accessedRouters = routerMap.filter(route => {
     if (hasPermission(roles.permissionList, route)) {
       if (route.children && route.children.length) {
@@ -64,6 +65,7 @@ const permission = {
   },
   actions: {
     GenerateRoutes ({ commit }, data) {
+      debugger
       return new Promise(resolve => {
         const { roles } = data
         const routerMap = cloneDeep(asyncRouterMap)

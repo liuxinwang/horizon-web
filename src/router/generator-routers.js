@@ -6,51 +6,26 @@ import { BasicLayout, BlankLayout, PageView, RouteView } from '@/layouts'
 // 前端路由表
 const constantRouterComponents = {
   // 基础页面 layout 必须引入
-  BasicLayout: BasicLayout,
-  BlankLayout: BlankLayout,
-  RouteView: RouteView,
-  PageView: PageView,
+  BasicLayout: () => import('@/layouts/BasicLayout'),
+  BlankLayout: () => import('@/layouts/BlankLayout'),
+  RouteView: () => import('@/layouts/RouteView'),
+  PageView: () => import('@/layouts/PageView'),
   '403': () => import(/* webpackChunkName: "error" */ '@/views/exception/403'),
   '404': () => import(/* webpackChunkName: "error" */ '@/views/exception/404'),
   '500': () => import(/* webpackChunkName: "error" */ '@/views/exception/500'),
 
   // 你需要动态引入的页面组件
-  Workplace: () => import('@/views/dashboard/Workplace'),
-  Analysis: () => import('@/views/dashboard/Analysis'),
+  InstanceList: () => import('@/views/instance/list'),
+  InstanceInspection: () => import('@/views/instance/inspection'),
 
-  // form
-  BasicForm: () => import('@/views/form/basicForm'),
-  StepForm: () => import('@/views/form/stepForm/StepForm'),
-  AdvanceForm: () => import('@/views/form/advancedForm/AdvancedForm'),
-
-  // list
-  TableList: () => import('@/views/list/TableList'),
-  StandardList: () => import('@/views/list/BasicList'),
-  CardList: () => import('@/views/list/CardList'),
-  SearchLayout: () => import('@/views/list/search/SearchLayout'),
-  SearchArticles: () => import('@/views/list/search/Article'),
-  SearchProjects: () => import('@/views/list/search/Projects'),
-  SearchApplications: () => import('@/views/list/search/Applications'),
-  ProfileBasic: () => import('@/views/profile/basic'),
-  ProfileAdvanced: () => import('@/views/profile/advanced/Advanced'),
-
-  // result
-  ResultSuccess: () => import(/* webpackChunkName: "result" */ '@/views/result/Success'),
-  ResultFail: () => import(/* webpackChunkName: "result" */ '@/views/result/Error'),
+  // system
+  SystemUser: () => import('@/views/system/user'),
+  SystemRole: () => import('@/views/system/role'),
 
   // exception
   Exception403: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
   Exception404: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
-  Exception500: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
-
-  // account
-  AccountCenter: () => import('@/views/account/center'),
-  AccountSettings: () => import('@/views/account/settings/Index'),
-  BasicSetting: () => import('@/views/account/settings/BasicSetting'),
-  SecuritySettings: () => import('@/views/account/settings/Security'),
-  CustomSettings: () => import('@/views/account/settings/Custom'),
-  BindingSettings: () => import('@/views/account/settings/Binding'),
-  NotificationSettings: () => import('@/views/account/settings/Notification')
+  Exception500: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500')
 
   // 'TestWork': () => import(/* webpackChunkName: "TestWork" */ '@/views/dashboard/TestWork')
 }
@@ -68,9 +43,9 @@ const rootRouter = {
   name: 'index',
   path: '',
   component: 'BasicLayout',
-  redirect: '/dashboard',
+  redirect: '/instance/list',
   meta: {
-    title: '首页'
+    title: 'menu.home'
   },
   children: []
 }
@@ -85,18 +60,72 @@ export const generatorDynamicRouter = token => {
     loginService
       .getCurrentUserNav(token)
       .then(res => {
-        console.log('generatorDynamicRouter response:', res)
-        const { result } = res
+        // console.log('generatorDynamicRouter response:', res)
+        /**
+        const result = [
+          {
+            'name': 'instance',
+            'parentId': 0,
+            'id': 1,
+            'meta': { 'icon': 'table', 'title': 'menu.instance', 'show': true },
+            'component': 'RouteView',
+            'redirect': '/instance/list'
+          },
+          {
+            'name': 'instanceList',
+            'parentId': 1,
+            'id': 1001,
+            // 'hideChildrenInMenu': true,
+            'meta': { 'title': 'menu.instance.list', 'icon': 'table', 'show': true },
+            'component': 'InstanceList',
+            'path': '/instance/list'
+          },
+          {
+            'name': 'InstanceInspection',
+            'parentId': 1,
+            'id': 1002,
+            'meta': { 'title': 'menu.instance.inspection', 'show': true },
+            'component': 'InstanceInspection',
+            'path': '/instance/inspection'
+          },
+          // 系统管理
+          {
+            'name': 'system',
+            'parentId': 0,
+            'id': 2,
+            'meta': { 'icon': 'table', 'title': 'menu.system', 'show': true },
+            'component': 'RouteView',
+            'redirect': '/system/user'
+          },
+          {
+            'name': 'SystemUser',
+            'parentId': 2,
+            'id': 2001,
+            'hideChildrenInMenu': true,
+            'meta': { 'title': 'menu.system.user', 'show': true },
+            'component': 'SystemUser',
+            'path': '/system/user'
+          },
+          {
+            'name': 'SystemRole',
+            'parentId': 2,
+            'id': 2002,
+            'meta': { 'title': 'menu.system.role', 'show': true },
+            'component': 'SystemRole',
+            'path': '/system/role'
+          }
+        ]
+         */
         const menuNav = []
         const childrenNav = []
         //      后端数据, 根级树数组,  根级 PID
-        listToTree(result, childrenNav, 0)
+        listToTree(res.data, childrenNav, 0)
         rootRouter.children = childrenNav
         menuNav.push(rootRouter)
-        console.log('menuNav', menuNav)
+        // console.log('menuNav', menuNav)
         const routers = generator(menuNav)
         routers.push(notFoundRouter)
-        console.log('routers', routers)
+        // console.log('routers', routers)
         resolve(routers)
       })
       .catch(err => {

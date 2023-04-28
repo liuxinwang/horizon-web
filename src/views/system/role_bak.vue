@@ -5,41 +5,19 @@
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="6" :sm="24">
-              <a-form-item label="实例ID">
-                <a-input v-model="queryParam.InstId" placeholder=""/>
+              <a-form-item label="角色ID">
+                <a-input v-model="queryParam.id" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
-              <a-form-item label="实例名称">
-                <a-input v-model="queryParam.Name" placeholder=""/>
+              <a-form-item label="角色名称">
+                <a-input v-model="queryParam.name" placeholder=""/>
               </a-form-item>
             </a-col>
-            <a-col :md="4" :sm="24">
-              <a-form-item label="实例状态">
-                <a-select v-model="queryParam.Status" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="Start">启动</a-select-option>
-                  <a-select-option value="Stop">停止</a-select-option>
-                  <a-select-option value="Running">运行中</a-select-option>
-                  <a-select-option value="Error">异常</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <template v-if="advanced">
-              <a-col :md="6" :sm="24">
-                <a-form-item label="实例IP">
-                  <a-input v-model="queryParam.Ip" placeholder=""/>
-                </a-form-item>
-              </a-col>
-            </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
                 <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
                 <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">重置</a-button>
-                <a @click="toggleAdvanced" style="margin-left: 8px">
-                  {{ advanced ? '收起' : '展开' }}
-                  <a-icon :type="advanced ? 'up' : 'down'"/>
-                </a>
               </span>
             </a-col>
           </a-row>
@@ -53,7 +31,7 @@
       <s-table
         ref="table"
         size="default"
-        rowKey="ID"
+        rowKey="id"
         :columns="columns"
         :data="loadData"
         showPagination="auto"
@@ -71,6 +49,9 @@
                 操作 <a-icon type="down" />
               </a>
               <a-menu slot="overlay">
+                <a-menu-item>
+                  <a v-action:funcPerms @click="handleFuncPerms(record)">功能权限</a>
+                </a-menu-item>
                 <a-menu-item>
                   <a v-action:delete @click="handleDelete(record)">删除</a>
                 </a-menu-item>
@@ -95,8 +76,8 @@
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getInstList, saveInst, deleteInst } from '@/api/instance'
-import CreateForm from './modules/CreateForm'
+import { getRoleList, saveRole, modifyRole, deleteRole } from '@/api/role'
+import CreateForm from './modules/CreateRoleForm'
 
 const columns = [
   {
@@ -104,38 +85,16 @@ const columns = [
     scopedSlots: { customRender: 'serial' }
   },
   {
-    title: '实例ID',
-    dataIndex: 'InstId'
+    title: '角色ID',
+    dataIndex: 'id'
   },
   {
-    title: '实例名称',
-    dataIndex: 'Name'
-  },
-  {
-    title: '实例版本',
-    dataIndex: 'Version'
-  },
-  {
-    title: '实例角色',
-    dataIndex: 'Role'
-  },
-  {
-    title: '实例IP',
-    dataIndex: 'Ip'
-  },
-  {
-    title: '巡检状态',
-    dataIndex: 'InspStatus',
-    scopedSlots: { customRender: 'InspStatus' }
-  },
-  {
-    title: '运行状态',
-    dataIndex: 'Status',
-    scopedSlots: { customRender: 'Status' }
+    title: '角色名称',
+    dataIndex: 'name'
   },
   {
     title: '创建时间',
-    dataIndex: 'CreatedAt'
+    dataIndex: 'createdAt'
   },
   {
     title: '操作',
@@ -146,7 +105,7 @@ const columns = [
 ]
 
 export default {
-  name: 'InstanceList',
+  name: 'RoleList',
   components: {
     STable,
     Ellipsis,
@@ -166,7 +125,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
-        return getInstList(requestParameters).then(res => {
+        return getRoleList(requestParameters).then(res => {
             return res.data
           })
       },
@@ -182,23 +141,24 @@ export default {
   },
   methods: {
     handleAdd () {
-      this.mdl = null
+      this.mdl = { Type: 'ins' }
       this.visible = true
     },
     handleEdit (record) {
       this.visible = true
+      record.Type = 'upd'
       this.mdl = { ...record }
     },
     handleDelete (record) {
       const that = this
       this.$confirm({
-        title: '确认删除实例' + record.InstId + '/' + record.Name + '?',
+        title: '确认删除角色' + record.id + '/' + record.name + '?',
         content: '删除后不可恢复',
         okText: '确认',
         okType: 'danger',
         cancelText: '取消 ',
         onOk () {
-          return deleteInst(record.ID).then(res => {
+          return deleteRole(record.id).then(res => {
             if (res.code === 1) {
               that.$refs.table.refresh()
               that.$message.info('删除成功')
@@ -211,12 +171,12 @@ export default {
     },
     handleOk () {
       const form = this.$refs.createModal.form
-      this.confirmLoading = true
       form.validateFields((errors, values) => {
         if (!errors) {
-          if (values.InstId !== '') {
+          this.confirmLoading = true
+          if (values.Type === 'upd') {
             // 修改 e.g.
-            saveInst(values).then(res => {
+            modifyRole(values).then(res => {
               if (res.code === 1) {
                 this.visible = false
                 this.confirmLoading = false
@@ -228,7 +188,7 @@ export default {
                 this.$message.info('修改成功')
               } else {
                 this.$message.error(res.err)
-              this.confirmLoading = false
+                this.confirmLoading = false
               }
             }).catch((e) => {
               console.log(e)
@@ -236,7 +196,7 @@ export default {
             })
           } else {
             // 新增
-            saveInst(values).then(res => {
+            saveRole(values).then(res => {
               if (res.code === 1) {
                 this.visible = false
                 this.confirmLoading = false
@@ -247,15 +207,13 @@ export default {
                 this.$message.info('新增成功')
               } else {
                 this.$message.error(res.err)
-              this.confirmLoading = false
+                this.confirmLoading = false
               }
             }).catch((e) => {
               console.log(e)
               this.confirmLoading = false
             })
           }
-        } else {
-          this.confirmLoading = false
         }
       })
     },

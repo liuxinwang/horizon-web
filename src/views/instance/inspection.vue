@@ -48,7 +48,7 @@
         </span>
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="handleDetail(record)">查看</a>
+            <a v-action:get @click="handleDetail(record)">查看</a>
           </template>
         </span>
       </s-table>

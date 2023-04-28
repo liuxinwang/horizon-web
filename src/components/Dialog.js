@@ -17,8 +17,11 @@ export default (Vue) => {
       if (checkFunction instanceof Function) {
         const res = checkFunction()
         if (res instanceof Promise) {
+          dialogInstance.changeConfirmLoading(true)
           res.then(c => {
             c && afterHandel()
+          }).finally(() => {
+            dialogInstance.changeConfirmLoading(false)
           })
         } else {
           res && afterHandel()
@@ -29,10 +32,12 @@ export default (Vue) => {
       }
     }
 
+    const { confirmLoading } = modalProps
     const dialogInstance = new Vue({
       data () {
         return {
-          visible: true
+          visible: true,
+          confirmLoading: !!confirmLoading
         }
       },
       router: _vm.$router,
@@ -50,6 +55,9 @@ export default (Vue) => {
             this.$refs._component.$emit('cancel')
             dialogInstance.$destroy()
           })
+        },
+        changeConfirmLoading (loading) {
+          this.confirmLoading = loading
         },
         handleOk () {
           handle(this.$refs._component.onOK || this.$refs._component.onOk, () => {
@@ -70,7 +78,8 @@ export default (Vue) => {
           attrs: Object.assign({}, {
             ...(modalProps.attrs || modalProps)
           }, {
-            visible: this.visible
+            visible: this.visible,
+            confirmLoading: this.confirmLoading
           }),
           on: Object.assign({}, {
             ...(modalProps.on || modalProps)

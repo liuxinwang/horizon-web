@@ -43,6 +43,12 @@ const errorHandler = (error) => {
         description: data.message
       })
     }
+    if (error.response.status === 500) {
+      notification.error({
+        message: '错误',
+        description: '请求失败，请稍后重试'
+      })
+    }
   }
   return Promise.reject(error)
 }
