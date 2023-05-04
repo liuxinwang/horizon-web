@@ -97,7 +97,7 @@
         @cancel="handleCancel"
         @ok="handleOk"
       />
-      <role-modal ref="modal" @ok="handleOk"></role-modal>
+      <role-modal ref="modal" @refreshTable="handleRoleModalOk"></role-modal>
 
     </a-card>
   </page-header-wrapper>
@@ -146,7 +146,7 @@ export default {
         },
         {
           title: '创建时间',
-          dataIndex: 'createTime',
+          dataIndex: 'createdAt',
           sorter: true
         }, {
           title: '操作',
@@ -282,6 +282,9 @@ export default {
           })
         }
       })
+    },
+    handleRoleModalOk () {
+      this.$refs.table.refresh()
     },
     onChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
