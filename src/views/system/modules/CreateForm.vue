@@ -72,7 +72,6 @@ export default {
       // [{ id: 'admin', name: '系统管理员' }, { id: 'dba', name: 'DBA' }]
       roleList: parameter => {
         return getRoleList().then(res => {
-          debugger
           return res.data
         })
       }
