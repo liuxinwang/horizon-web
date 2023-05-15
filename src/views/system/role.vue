@@ -216,7 +216,6 @@ export default {
       const form = this.$refs.createModal.form
       this.confirmLoading = true
       form.validateFields((errors, values) => {
-        debugger
         if (!errors) {
           if (values.type === 'upd') {
             // 修改 e.g.
