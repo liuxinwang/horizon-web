@@ -18,6 +18,10 @@ const constantRouterComponents = {
   InstanceList: () => import('@/views/instance/list'),
   InstanceInspection: () => import('@/views/instance/inspection'),
 
+  // sql audit
+  SQLAuditProject: () => import('@/views/sqlaudit/project'),
+  SQLAuditWorkflow: () => import('@/views/sqlaudit/workflow'),
+
   // system
   SystemUser: () => import('@/views/system/user'),
   SystemRole: () => import('@/views/system/role'),

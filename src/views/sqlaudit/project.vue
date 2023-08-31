@@ -5,41 +5,23 @@
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="6" :sm="24">
-              <a-form-item label="实例ID">
-                <a-input v-model="queryParam.instId" placeholder=""/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item label="实例名称">
+              <a-form-item label="项目名称">
                 <a-input v-model="queryParam.name" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="4" :sm="24">
-              <a-form-item label="实例状态">
+              <a-form-item label="项目状态">
                 <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
                   <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="Start">启动</a-select-option>
-                  <a-select-option value="Stop">停止</a-select-option>
-                  <a-select-option value="Running">运行中</a-select-option>
-                  <a-select-option value="Error">异常</a-select-option>
+                  <a-select-option value="Enabled">正常</a-select-option>
+                  <a-select-option value="Disabled">禁用</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
-            <template v-if="advanced">
-              <a-col :md="6" :sm="24">
-                <a-form-item label="实例IP">
-                  <a-input v-model="queryParam.ip" placeholder=""/>
-                </a-form-item>
-              </a-col>
-            </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
                 <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
                 <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">重置</a-button>
-                <a @click="toggleAdvanced" style="margin-left: 8px">
-                  {{ advanced ? '收起' : '展开' }}
-                  <a-icon :type="advanced ? 'up' : 'down'"/>
-                </a>
               </span>
             </a-col>
           </a-row>
@@ -53,7 +35,7 @@
       <s-table
         ref="table"
         size="default"
-        rowKey="id"
+        rowKey="ID"
         :columns="columns"
         :data="loadData"
         showPagination="auto"
@@ -72,6 +54,9 @@
               </a>
               <a-menu slot="overlay">
                 <a-menu-item>
+                  <a v-action:delete @click="$refs.projectResourceModal.edit(record)">项目资源配置</a>
+                </a-menu-item>
+                <a-menu-item>
                   <a v-action:delete @click="handleDelete(record)">删除</a>
                 </a-menu-item>
               </a-menu>
@@ -88,6 +73,8 @@
         @cancel="handleCancel"
         @ok="handleOk"
       />
+
+      <project-resource-form ref="projectResourceModal" @refreshTable="handleProjectResourceModalOk"/>
     </a-card>
   </page-header-wrapper>
 </template>
@@ -95,8 +82,9 @@
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getInstList, saveInst, deleteInst } from '@/api/instance'
+import { getProjList, saveProj, deleteProj } from '@/api/sqlaudit/project'
 import CreateForm from './modules/CreateForm'
+import ProjectResourceForm from './modules/ProjectResourceForm'
 
 const columns = [
   {
@@ -104,32 +92,15 @@ const columns = [
     scopedSlots: { customRender: 'serial' }
   },
   {
-    title: '实例ID',
-    dataIndex: 'instId'
+    title: '项目ID',
+    dataIndex: 'projId'
   },
   {
-    title: '实例名称',
+    title: '项目名称',
     dataIndex: 'name'
   },
   {
-    title: '实例版本',
-    dataIndex: 'version'
-  },
-  {
-    title: '实例角色',
-    dataIndex: 'role'
-  },
-  {
-    title: '实例IP',
-    dataIndex: 'ip'
-  },
-  {
-    title: '巡检状态',
-    dataIndex: 'inspStatus',
-    scopedSlots: { customRender: 'inspStatus' }
-  },
-  {
-    title: '运行状态',
+    title: '状态',
     dataIndex: 'status',
     scopedSlots: { customRender: 'status' }
   },
@@ -146,11 +117,12 @@ const columns = [
 ]
 
 export default {
-  name: 'InstanceList',
+  name: 'ProjectList',
   components: {
     STable,
     Ellipsis,
-    CreateForm
+    CreateForm,
+    ProjectResourceForm
   },
   data () {
     this.columns = columns
@@ -166,7 +138,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
-        return getInstList(requestParameters).then(res => {
+        return getProjList(requestParameters).then(res => {
             return res.data
           })
       },
@@ -192,13 +164,13 @@ export default {
     handleDelete (record) {
       const that = this
       this.$confirm({
-        title: '确认删除实例' + record.instId + '/' + record.name + '?',
+        title: '确认删除项目' + record.projId + '/' + record.name + '?',
         content: '删除后不可恢复',
         okText: '确认',
         okType: 'danger',
         cancelText: '取消 ',
         onOk () {
-          return deleteInst(record.id).then(res => {
+          return deleteProj(record.id).then(res => {
             if (res.code === 1) {
               that.$refs.table.refresh()
               that.$message.info('删除成功')
@@ -214,9 +186,9 @@ export default {
       this.confirmLoading = true
       form.validateFields((errors, values) => {
         if (!errors) {
-          if (values.instId !== '') {
+          if (values.projId !== '') {
             // 修改 e.g.
-            saveInst(values).then(res => {
+            saveProj(values).then(res => {
               if (res.code === 1) {
                 this.visible = false
                 this.confirmLoading = false
@@ -236,7 +208,7 @@ export default {
             })
           } else {
             // 新增
-            saveInst(values).then(res => {
+            saveProj(values).then(res => {
               if (res.code === 1) {
                 this.visible = false
                 this.confirmLoading = false
@@ -271,6 +243,9 @@ export default {
       this.queryParam = {
         date: moment(new Date())
       }
+    },
+    handleProjectResourceModalOk () {
+      this.$refs.table.refresh()
     }
   }
 }

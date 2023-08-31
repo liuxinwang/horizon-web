@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    :title="this.model && this.model.InstId !== '' ? '修改实例' : '接入实例'"
+    :title="this.model && this.model.instId !== '' ? '修改实例' : '接入实例'"
     :width="640"
     :visible="visible"
     :confirmLoading="loading"
@@ -10,29 +10,29 @@
     <a-spin :spinning="loading">
       <a-form :form="form" v-bind="formLayout">
         <!-- 检查是否有 id 并且大于0，大于0是修改。其他是新增，新增不显示主键ID -->
-        <a-form-item v-show="model && model.InstId !== ''" label="实例ID">
-          <a-input v-decorator="['InstId', {initialValue: ''}]" disabled />
+        <a-form-item v-show="model && model.instId !== ''" label="实例ID">
+          <a-input v-decorator="['instId', {initialValue: ''}]" disabled />
         </a-form-item>
         <a-form-item label="名称">
-          <a-input v-decorator="['Name', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的实例名称！'}]}]" />
+          <a-input v-decorator="['name', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的实例名称！'}]}]" />
         </a-form-item>
         <a-form-item label="角色">
-          <a-select v-decorator="['Role', {initialValue: 'Master', rules: [{required: true}]}]">
+          <a-select v-decorator="['role', {initialValue: 'Master', rules: [{required: true}]}]">
             <a-select-option value="Master">Master</a-select-option>
             <a-select-option value="Slave">Slave</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="Ip地址">
-          <a-input v-decorator="['Ip', {rules: [{required: true, min: 7, max: 20, message: '请输入7到20个字符的Ip地址！'}]}]" />
+          <a-input v-decorator="['ip', {rules: [{required: true, min: 7, max: 20, message: '请输入7到20个字符的Ip地址！'}]}]" />
         </a-form-item>
         <a-form-item label="端口号">
-          <a-input-number style="width: 100%" v-decorator="['Port', {rules: [{required: true, type: 'number', min: 1000, max: 65535, message: '请输入1000-65535之间的端口号！'}]}]" />
+          <a-input-number style="width: 100%" v-decorator="['port', {rules: [{required: true, type: 'number', min: 1000, max: 65535, message: '请输入1000-65535之间的端口号！'}]}]" />
         </a-form-item>
         <a-form-item label="账号">
-          <a-input v-decorator="['User', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的连接账号！'}]}]" />
+          <a-input v-decorator="['user', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的连接账号！'}]}]" />
         </a-form-item>
         <a-form-item label="密码">
-          <a-input-password v-decorator="['Password', {rules: [{required: true, min: 1, max: 100, message: '请输入1到100个字符的连接密码！'}]}]" />
+          <a-input-password v-decorator="['password', {rules: [{required: true, min: 1, max: 100, message: '请输入1到100个字符的连接密码！'}]}]" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -43,7 +43,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['InstId', 'Name', 'Role', 'Ip', 'Port', 'User', 'Password']
+const fields = ['instId', 'name', 'role', 'ip', 'port', 'user', 'password']
 
 export default {
   props: {
