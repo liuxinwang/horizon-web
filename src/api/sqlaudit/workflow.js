@@ -21,7 +21,7 @@ export function getWorkflowInfo (parameter) {
 export function saveWorkflow (parameter) {
   return request({
     url: '/sqlaudit/workflow',
-    method: parameter.workflowId === '' ? 'post' : 'put',
+    method: parameter.id === 0 ? 'post' : 'put',
     data: parameter
   })
 }

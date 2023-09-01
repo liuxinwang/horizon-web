@@ -49,3 +49,19 @@ export function getProjRoleList (parameter) {
     params: parameter
   })
 }
+
+export function getUserProjInfos (parameter) {
+  return request({
+    url: '/sqlaudit/project/user/' + parameter,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getProjDatasources (parameter) {
+  return request({
+    url: '/sqlaudit/project/datasource/' + parameter,
+    method: 'get',
+    params: parameter
+  })
+}

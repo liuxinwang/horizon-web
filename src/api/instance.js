@@ -33,3 +33,11 @@ export function deleteInst (parameter) {
     data: parameter
   })
 }
+
+export function getInstDbs (parameter) {
+  return request({
+    url: '/instance/db/' + parameter,
+    method: 'get',
+    params: parameter
+  })
+}
