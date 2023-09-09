@@ -21,7 +21,7 @@ export function getInstInfo (parameter) {
 export function saveInst (parameter) {
   return request({
     url: '/instance',
-    method: parameter.InstId === '' ? 'post' : 'put',
+    method: parameter.instId === '' ? 'post' : 'put',
     data: parameter
   })
 }

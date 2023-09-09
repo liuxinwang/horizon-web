@@ -1,7 +1,7 @@
 import storage from 'store'
 import expirePlugin from 'store/plugins/expire'
 import { login, getInfo, logout } from '@/api/login'
-import { ACCESS_TOKEN } from '@/store/mutation-types'
+import { ACCESS_TOKEN, USER_NAME, NICK_NAME } from '@/store/mutation-types'
 import { welcome } from '@/utils/util'
 
 storage.addPlugin(expirePlugin)
@@ -55,6 +55,8 @@ const user = {
           const result = response.data
           if (result.user.userName !== '') {
             commit('SET_INFO', result.user)
+            storage.set(USER_NAME, result.user.userName)
+            storage.set(NICK_NAME, result.user.nickName)
           } else {
             reject(new Error('getInfo: User doesn\'t exist !'))
           }
@@ -227,7 +229,10 @@ const user = {
         logout(state.token).then(() => {
           commit('SET_TOKEN', '')
           commit('SET_NAME', '')
+          commit('SET_ROLES', '')
           storage.remove(ACCESS_TOKEN)
+          storage.remove(USER_NAME)
+          storage.remove(NICK_NAME)
           resolve()
         }).catch((err) => {
           console.log('logout fail:', err)

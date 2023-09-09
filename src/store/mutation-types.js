@@ -1,4 +1,6 @@
 export const ACCESS_TOKEN = 'Authorization'
+export const USER_NAME = 'userName'
+export const NICK_NAME = 'nickName'
 
 export const SIDEBAR_TYPE = 'sidebar_type'
 export const TOGGLE_MOBILE_TYPE = 'is_mobile'

@@ -33,3 +33,35 @@ export function deleteWorkflow (parameter) {
     data: parameter
   })
 }
+
+export function getWorkflowProgress (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/progress/' + parameter,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function auditWorkflow (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/audit',
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function cancelWorkflow (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/cancel',
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function executeWorkflow (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/execute',
+    method: 'post',
+    data: parameter
+  })
+}

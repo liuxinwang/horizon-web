@@ -21,6 +21,8 @@ const constantRouterComponents = {
   // sql audit
   SQLAuditProject: () => import('@/views/sqlaudit/project'),
   SQLAuditWorkflow: () => import('@/views/sqlaudit/workflow'),
+  SQLAuditWorkflowDetail: () => import('@/views/sqlaudit/workflowDetail'),
+  SQLAuditWorkflowTemplate: () => import('@/views/sqlaudit/workflowTemplate'),
 
   // system
   SystemUser: () => import('@/views/system/user'),

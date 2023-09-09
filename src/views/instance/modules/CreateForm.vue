@@ -16,6 +16,12 @@
         <a-form-item label="名称">
           <a-input v-decorator="['name', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的实例名称！'}]}]" />
         </a-form-item>
+        <a-form-item label="类型">
+          <a-select v-decorator="['type', {initialValue: 'MySQL', rules: [{required: true}]}]">
+            <a-select-option value="MySQL">MySQL</a-select-option>
+            <a-select-option value="Doris">Doris</a-select-option>
+          </a-select>
+        </a-form-item>
         <a-form-item label="角色">
           <a-select v-decorator="['role', {initialValue: 'Master', rules: [{required: true}]}]">
             <a-select-option value="Master">Master</a-select-option>
@@ -29,10 +35,10 @@
           <a-input-number style="width: 100%" v-decorator="['port', {rules: [{required: true, type: 'number', min: 1000, max: 65535, message: '请输入1000-65535之间的端口号！'}]}]" />
         </a-form-item>
         <a-form-item label="账号">
-          <a-input v-decorator="['user', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的连接账号！'}]}]" />
+          <a-input v-decorator="['user', {rules: [{required: true, min: 1, max: 50, message: '请输入1到50个字符的连接账号！'}]}]" autocomplete="new-password" />
         </a-form-item>
         <a-form-item label="密码">
-          <a-input-password v-decorator="['password', {rules: [{required: true, min: 1, max: 100, message: '请输入1到100个字符的连接密码！'}]}]" />
+          <a-input-password v-decorator="['password', {rules: [{required: true, min: 1, max: 100, message: '请输入1到100个字符的连接密码！'}]}]" autocomplete="new-password" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -43,7 +49,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['instId', 'name', 'role', 'ip', 'port', 'user', 'password']
+const fields = ['instId', 'name', 'type', 'role', 'ip', 'port', 'user', 'password']
 
 export default {
   props: {

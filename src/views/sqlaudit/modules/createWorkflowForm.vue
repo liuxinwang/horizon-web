@@ -4,7 +4,9 @@
     :width="1000"
     :visible="visible"
     :confirmLoading="loading"
-    @ok="() => { $emit('ok') }"
+    @ok="() => {
+      $emit('ok')
+    }"
     @cancel="() => {
       this.datasourceData = []
       this.databaseData =[]
@@ -37,14 +39,19 @@
           </a-select>
         </a-form-item>
         <a-form-item label="数据库">
-          <a-select v-decorator="['dbName', {rules: [{required: true, message: $t('form.sqlworkflow-form.describe.required') }]}]" @change="handleDatabaseChange">
+          <a-select ref="dbName" v-decorator="['dbName', {rules: [{required: true, message: $t('form.sqlworkflow-form.describe.required') }]}]">
             <a-select-option v-for="db in databaseData" :key="db.name">
               {{ db.name }}
             </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="SQL语句">
-          <a-textarea v-decorator="['sqlContent', {rules: [{required: true, min: 1, max: 255, message: $t('form.sqlworkflow-form.describe.required') }]}]" :rows="10" />
+          <codemirror
+            ref="sqlCode"
+            v-decorator="['sqlContent', {initialValue: ''}, {rules: [{required: true, message: 'SQL语句不能为空' }]}]"
+            :options="options"
+            @changes="onCmCodeChanges"
+            :style="{ height: '400px' ,textAlign: 'left', lineHeight: '24px'}" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -56,10 +63,23 @@ import pick from 'lodash.pick'
 import { getUserProjInfos, getProjDatasources } from '@/api/sqlaudit/project'
 import { getInstDbs } from '@/api/instance'
 
+import { codemirror } from 'vue-codemirror'
+import 'codemirror/theme/ambiance.css'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/hint/show-hint.css'
+require('codemirror/lib/codemirror')
+require('codemirror/addon/edit/matchbrackets')
+require('codemirror/addon/selection/active-line')
+
+require('codemirror/addon/hint/show-hint')
+require('codemirror/addon/hint/sql-hint')
+
 // 表单字段
 const fields = ['id', 'name', 'describe', 'projId', 'instId', 'dbName', 'sqlContent']
 
 export default {
+  name: 'CreateWorkflowForm',
+  components: { codemirror },
   props: {
     visible: {
       type: Boolean,
@@ -89,8 +109,30 @@ export default {
       form: this.$form.createForm(this),
       projectData: [],
       datasourceData: [],
-      databaseData: []
+      databaseData: [],
+      options: {
+        mode: 'text/x-mysql', // 选择对应代码编辑器的语言，我这边选的是数据库，根据个人情况自行设置即可
+        tabSize: 2,
+        indentWithTabs: true,
+        smartIndent: true,
+        lineNumbers: true,
+        line: true,
+        matchBrackets: true,
+        styleActiveLine: true, // 设置光标所在行高亮true/false
+        // theme: 'base16-light',
+        cursorHeight: 1,
+        autofocus: true,
+        extraKeys: { 'Ctrl': 'autocomplete' }, // 自定义快捷键
+        hintOptions: { // 自定义提示选项
+          completeSingle: false, // 当匹配只有一项的时候是否自动补全
+          tables: {
+            users: ['name']
+          }
+        }
+      }
     }
+  },
+  mounted () {
   },
   created () {
     // 防止表单未注册
@@ -125,9 +167,16 @@ export default {
         this.databaseData = res.data
       })
     },
-    handleDatabaseChange () {
-
+    onCmCodeChanges (cm, changes) {
+      const value = cm.getValue()
+      this.form.setFieldsValue({ 'sqlContent': value })
     }
   }
 }
 </script>
+
+<style scoped>
+   .CodeMirror-code {
+    line-height: 16px;
+  }
+</style>
