@@ -22,6 +22,14 @@
             <a-select-option value="Doris">Doris</a-select-option>
           </a-select>
         </a-form-item>
+        <a-form-item label="环境">
+          <a-select v-decorator="['envType', {initialValue: 'dev', rules: [{required: true}]}]">
+            <a-select-option value="dev">开发</a-select-option>
+            <a-select-option value="test">测试</a-select-option>
+            <a-select-option value="pre">预发</a-select-option>
+            <a-select-option value="prod">生产</a-select-option>
+          </a-select>
+        </a-form-item>
         <a-form-item label="角色">
           <a-select v-decorator="['role', {initialValue: 'Master', rules: [{required: true}]}]">
             <a-select-option value="Master">Master</a-select-option>
@@ -49,7 +57,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['instId', 'name', 'type', 'role', 'ip', 'port', 'user', 'password']
+const fields = ['instId', 'name', 'type', 'envType', 'role', 'ip', 'port', 'user', 'password']
 
 export default {
   props: {

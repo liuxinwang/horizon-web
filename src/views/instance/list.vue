@@ -112,6 +112,14 @@ const columns = [
     dataIndex: 'name'
   },
   {
+    title: '类型',
+    dataIndex: 'type'
+  },
+  {
+    title: '环境',
+    dataIndex: 'envType'
+  },
+  {
     title: '实例版本',
     dataIndex: 'version'
   },
