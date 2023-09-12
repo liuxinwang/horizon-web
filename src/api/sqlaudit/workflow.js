@@ -65,3 +65,11 @@ export function executeWorkflow (parameter) {
     data: parameter
   })
 }
+
+export function getWorkflowSqlDetail (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/sqlDetail',
+    method: 'get',
+    params: parameter
+  })
+}

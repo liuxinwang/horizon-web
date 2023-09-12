@@ -1,7 +1,7 @@
 <template>
   <page-header-wrapper>
     <a-card :bordered="false">
-      <a-descriptions title="工单信息">
+      <a-descriptions title="工单信息" size="small">
         <a-descriptions-item label="工单ID">{{ workflowInfo.id }}</a-descriptions-item>
         <a-descriptions-item label="工单名称">{{ workflowInfo.name }}</a-descriptions-item>
         <a-descriptions-item label="工单状态">
@@ -22,17 +22,22 @@
       </a-descriptions>
       <a-divider style="margin-bottom: 32px"/>
 
-      <div class="title" hidden>工单详情</div>
+      <div class="title">工单SQL</div>
       <s-table
+        size="small"
         style="margin-bottom: 24px"
         row-key="id"
         :columns="auditDetailColumns"
         :data="loadAuditDetailData"
-        hidden>
+      >
       </s-table>
 
       <div class="title">流程进度</div>
-      <a-steps :direction="isMobile && 'vertical' || 'horizontal'" :current="currentStep" progressDot>
+      <a-steps
+        :direction="isMobile && 'vertical' || 'horizontal'"
+        :current="currentStep"
+        progressDot
+        size="small">
         <a-step>
           <template v-slot:title>
             <span>创建工单</span>
@@ -139,12 +144,13 @@
 <script>
 import storage from 'store'
 import { USER_NAME, NICK_NAME } from '@/store/mutation-types'
-import { STable } from '@/components'
-import { getWorkflowInfo, getWorkflowProgress, auditWorkflow, cancelWorkflow, executeWorkflow } from '@/api/sqlaudit/workflow'
+import { STable, Ellipsis } from '@/components'
+import { getWorkflowInfo, getWorkflowProgress, auditWorkflow, cancelWorkflow, executeWorkflow, getWorkflowSqlDetail } from '@/api/sqlaudit/workflow'
 
 export default {
   components: {
-    STable
+    STable,
+    Ellipsis
   },
   data () {
     return {
@@ -156,18 +162,30 @@ export default {
       auditDetailColumns: [
         {
           title: '序号',
-          dataIndex: 'id',
-          key: 'id'
+          dataIndex: 'serialNumber',
+          key: 'serialNumber'
         },
         {
           title: 'SQL内容',
-          dataIndex: 'sqlContent',
-          key: 'sqlContent'
+          dataIndex: 'statement',
+          key: 'statement',
+          ellipsis: true,
+          width: 300
         },
         {
-          title: '审核结果',
-          dataIndex: 'auditResult',
-          key: 'auditResult'
+          title: '审核状态',
+          dataIndex: 'auditStatus',
+          key: 'auditStatus'
+        },
+        {
+          title: '审核等级',
+          dataIndex: 'auditLevel',
+          key: 'auditLevel'
+        },
+        {
+          title: '审核信息',
+          dataIndex: 'auditMsg',
+          key: 'auditMsg'
         },
         {
           title: '执行状态',
@@ -194,28 +212,21 @@ export default {
           align: 'right'
         }
       ],
+      queryParam: {
+        workflowId: 0
+      },
       // 加载数据方法 必须为 Promise 对象
-      loadAuditDetailData: () => {
-        return new Promise(resolve => {
-          resolve({
-            data: [
-              {
-                id: '1',
-                sqlContent: '-',
-                auditResult: '-',
-                executionStatus: '-',
-                affectedRows: '-',
-                executionTime: '-',
-                backupTime: '-'
-              }
-            ],
-            pageSize: 10,
-            pageNo: 1,
-            totalPage: 1,
-            totalCount: 10
-          })
-        }).then(res => {
-          return res
+      loadAuditDetailData: parameter => {
+        this.queryParam.workflowId = this.workflowId
+        const requestParameters = Object.assign({}, parameter, this.queryParam)
+        return getWorkflowSqlDetail(requestParameters).then(res => {
+          if (res.code === 1) {
+            return res.data
+          } else {
+            this.$message.error(res.err)
+          }
+        }).catch((e) => {
+          console.log(e)
         })
       },
       workflowProgress: [],
