@@ -1,9 +1,11 @@
 <template>
   <a-modal
-    :title="this.model && this.model.id !== '' ? '修改工单' : '新增工单'"
+    :title="this.model && this.model.id !== '' ? '重提工单' : '新增工单'"
     :width="1000"
     :visible="visible"
     :confirmLoading="loading"
+    :keyboard="false"
+    :maskClosable="false"
     @ok="() => {
       $emit('ok')
     }"
@@ -15,7 +17,7 @@
     <a-spin :spinning="loading">
       <a-form :form="form" v-bind="formLayout">
         <!-- 检查是否有 id 并且大于0，大于0是修改。其他是新增，新增不显示主键ID -->
-        <a-form-item v-show="model && model.id !== ''" label="工单ID">
+        <a-form-item v-show="false" label="工单ID">
           <a-input v-decorator="['id', {initialValue: 0}]" disabled />
         </a-form-item>
         <a-form-item :label="$t('form.sqlworkflow-form.name.label')">
@@ -140,6 +142,10 @@ export default {
 
     // 当 model 发生改变时，为表单设置值
     this.$watch('model', () => {
+      if (this.model.id > 0) {
+        this.handleProjectChange(this.model.projId)
+        this.handleDatasourceChange(this.model.instId)
+      }
       this.model && this.form.setFieldsValue(pick(this.model, fields))
     })
 

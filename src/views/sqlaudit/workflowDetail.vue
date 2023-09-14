@@ -24,11 +24,13 @@
 
       <div class="title">工单SQL</div>
       <s-table
+        ref="auditDetailTable"
         size="small"
         style="margin-bottom: 24px"
         row-key="id"
         :columns="auditDetailColumns"
         :data="loadAuditDetailData"
+        bordered
       >
       </s-table>
 
@@ -134,7 +136,7 @@
             :disabled="btnOptPerm.isCanModifiedDisabled"
             :loading="btnOptPerm.isCanModifiedLoading"
             class="optBtnClass"
-            @click="handleCanceled()">重新修改</a-button>
+            @click="handleReModify()">重新修改</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-card>
@@ -163,7 +165,9 @@ export default {
         {
           title: '序号',
           dataIndex: 'serialNumber',
-          key: 'serialNumber'
+          key: 'serialNumber',
+          width: 50,
+          align: 'center'
         },
         {
           title: 'SQL内容',
@@ -190,26 +194,28 @@ export default {
         {
           title: '执行状态',
           dataIndex: 'executionStatus',
-          key: 'executionStatus',
-          align: 'right'
+          key: 'executionStatus'
+        },
+        {
+          title: '执行信息',
+          dataIndex: 'executionMsg',
+          key: 'executionMsg',
+          ellipsis: true
         },
         {
           title: '扫描/影响行数',
           dataIndex: 'affectedRows',
-          key: 'affectedRows',
-          align: 'right'
+          key: 'affectedRows'
         },
         {
           title: '执行耗时',
           dataIndex: 'executionTime',
-          key: 'executionTime',
-          align: 'right'
+          key: 'executionTime'
         },
         {
           title: '备份耗时',
           dataIndex: 'backupTime',
-          key: 'backupTime',
-          align: 'right'
+          key: 'backupTime'
         }
       ],
       queryParam: {
@@ -447,14 +453,28 @@ export default {
           this.btnOptPerm.isCanCanceled = false
           this.btnOptPerm.isCanCanceledDisabled = false
         } else {
+          this.currentStep = 0
+          this.handleInitData()
           this.$message.error(res.err)
+          this.btnOptPerm.isCanExecution = false
           this.btnOptPerm.isCanExecutionLoading = false
+          this.btnOptPerm.isCanCanceled = false
           this.btnOptPerm.isCanCanceledDisabled = false
         }
+        // refresh workflowSqlDetail
+        this.$refs.auditDetailTable.refresh(true)
       }).catch((e) => {
         console.log(e)
         this.btnOptPerm.isCanExecutionLoading = false
           this.btnOptPerm.isCanCanceledDisabled = false
+      })
+    },
+    handleReModify () {
+      this.$router.push({
+        name: 'SQLAuditWorkflowList',
+        params: {
+          name: this.workflowInfo.name
+        }
       })
     }
   }

@@ -54,11 +54,11 @@
             {{ status | statusName }}
           </a-tag>
         </span>
-        <!--
         <span slot="action" slot-scope="text, record">
-          <template>
-            <a v-action:edit @click="handleEdit(record)">修改</a>
+          <template v-if="record.status === 'ExecutionFailed'">
+            <a v-action:edit @click="handleEdit(record)">重新修改</a>
           </template>
+          <!--
           <template>
             <a-dropdown>
               <a class="ant-dropdown-link">
@@ -71,8 +71,8 @@
               </a-menu>
             </a-dropdown>
           </template>
+          -->
         </span>
-      -->
       </s-table>
 
       <create-workflow-form
@@ -114,8 +114,8 @@ const columns = [
   },
   {
     title: '创建人',
-    dataIndex: 'userName',
-    scopedSlots: { customRender: 'userName' }
+    dataIndex: 'nickName',
+    scopedSlots: { customRender: 'nickName' }
   },
   {
     title: '创建时间',
@@ -170,7 +170,7 @@ export default {
             }
             switch (item.status) {
               case 'PendingAudit':
-                item.waitHandleUser = item.workflowRecords[len - 1].assigneeUserName
+                item.waitHandleUser = item.workflowRecords[len - 1].user.nickName
                 return item
               default:
                 return item
@@ -208,6 +208,8 @@ export default {
     }
   },
   created () {
+    const workflowName = this.$route.params.name
+    this.queryParam.name = workflowName
   },
   computed: {
   },
@@ -245,6 +247,10 @@ export default {
       this.confirmLoading = true
       form.validateFields((errors, values) => {
         if (!errors) {
+          // 重置id = 0，重新提交走新增
+          if (values.id !== 0) {
+            values.id = 0
+          }
           if (values.id !== 0) {
             // 修改 e.g.
             saveWorkflow(values).then(res => {
