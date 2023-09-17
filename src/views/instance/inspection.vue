@@ -6,12 +6,12 @@
           <a-row :gutter="48">
             <a-col :md="6" :sm="24">
               <a-form-item label="实例ID">
-                <a-input v-model="queryParam.InstId" placeholder=""/>
+                <a-input v-model="queryParam.instId" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item label="实例名称">
-                <a-input v-model="queryParam.InstName" placeholder=""/>
+                <a-input v-model="queryParam.instName" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
@@ -31,7 +31,7 @@
       <s-table
         ref="table"
         size="default"
-        rowKey="ID"
+        rowKey="id"
         :columns="columns"
         :data="loadData"
         showPagination="auto"
@@ -39,11 +39,11 @@
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
-        <span slot="Level" slot-scope="Level">
+        <span slot="level" slot-scope="level">
           <a-tag
-            :color="Level === 'CRITICAL' ? 'red' : Level === 'RISKY' ? 'orange' : Level === 'SUBOPTIMAL' ? 'blue' : Level === 'HEALTHY' ? 'green' : 'pink'"
+            :color="level | levelColorFilter"
           >
-            {{ Level | levelName }}
+            {{ level | levelFilter }}
           </a-tag>
         </span>
         <span slot="action" slot-scope="text, record">
@@ -78,28 +78,28 @@ const columns = [
   },
   {
     title: '巡检ID',
-    dataIndex: 'InspId'
+    dataIndex: 'inspId'
   },
   {
     title: '实例ID',
-    dataIndex: 'InstId'
+    dataIndex: 'instId'
   },
   {
     title: '实例名称',
-    dataIndex: 'InstName'
+    dataIndex: 'instName'
   },
   {
     title: '评分',
-    dataIndex: 'Score'
+    dataIndex: 'score'
   },
   {
     title: '等级',
-    dataIndex: 'Level',
-    scopedSlots: { customRender: 'Level' }
+    dataIndex: 'level',
+    scopedSlots: { customRender: 'level' }
   },
   {
     title: '创建时间',
-    dataIndex: 'CreatedAt'
+    dataIndex: 'createdAt'
   },
   {
     title: '操作',
@@ -139,19 +139,23 @@ export default {
     }
   },
   filters: {
-    levelName (level) {
-      switch (level) {
-        case 'CRITICAL':
-          return '高危'
-        case 'RISKY':
-          return '危险'
-        case 'SUBOPTIMAL':
-          return '亚健康'
-        case 'HEALTHY':
-          return '健康'
-        default:
-          return level
+    levelFilter (level) {
+      const levelMap = {
+        'CRITICAL': '高危',
+        'RISKY': '危险',
+        'SUBOPTIMAL': '亚健康',
+        'HEALTHY': '健康'
       }
+      return levelMap[level]
+    },
+    levelColorFilter (level) {
+      const levelColorMap = {
+        'CRITICAL': 'red',
+        'RISKY': 'orange',
+        'SUBOPTIMAL': 'blue',
+        'HEALTHY': 'green'
+      }
+      return levelColorMap[level]
     }
   },
   created () {

@@ -11,11 +11,11 @@
     <a-spin :spinning="loading">
       <a-card title="基本信息" :bordered="false" :size="size" :headStyle="{ border: '1px solid #e8e8e8' }" :bodyStyle="{ padding: '0px' }">
         <a-descriptions bordered :size="size" :column="1">
-          <a-descriptions-item label="巡检ID">{{ inspData.InspId }}</a-descriptions-item>
-          <a-descriptions-item label="实例名称">{{ instData.Name }}</a-descriptions-item>
-          <a-descriptions-item label="实例角色">{{ instData.Role }}</a-descriptions-item>
-          <a-descriptions-item label="实例IP">{{ instData.Ip }}</a-descriptions-item>
-          <a-descriptions-item label="实例端口">{{ instData.Port }}</a-descriptions-item>
+          <a-descriptions-item label="巡检ID">{{ inspData.inspId }}</a-descriptions-item>
+          <a-descriptions-item label="实例名称">{{ instData.name }}</a-descriptions-item>
+          <a-descriptions-item label="实例角色">{{ instData.role }}</a-descriptions-item>
+          <a-descriptions-item label="实例IP">{{ instData.ip }}</a-descriptions-item>
+          <a-descriptions-item label="实例端口">{{ instData.port }}</a-descriptions-item>
         </a-descriptions>
       </a-card>
       <a-card title="扣分详情" :size="size" style="margin-top: 20px">
@@ -119,8 +119,8 @@ export default {
       instQTpsMetricLineData: [ { time: '-', qps: 0, tps: 0 } ],
       instReplStatusMetricLineData: [ ],
       instReplDelayMetricLineData: [ { time: '-', replDelay: 0 } ],
-      inspData: { InspId: null },
-      instData: { InstId: null, Name: null },
+      inspData: { inspId: null },
+      instData: { instId: null, name: null },
       serverMetricValue: { cpu: [], memory: [], disk: [] },
       serverIOPSMetricValue: [],
       instLockMetricValue: { deadlock: [], lockWait: [] },
@@ -132,24 +132,24 @@ export default {
       instQTpsMetricValue: { qps: [], tps: [] },
       instReplStatusMetricValue: [],
       instReplDelayMetricValue: [],
-      bigtableData: [ { TableSchema: '-', TableName: '-', TableRows: 0, TableSize: 0 } ],
-      deductionData: [ { Metric: '-', Deduction: '-', Message: '-' } ],
+      bigtableData: [ { tableSchema: '-', tableName: '-', tableRows: 0, tableSize: 0 } ],
+      deductionData: [ { metric: '-', deduction: '-', message: '-' } ],
       highRiskAccountData: [ { user: '-', host: '-' } ],
       bigtableColumns: [
         {
           title: '库名',
-          dataIndex: 'TableSchema',
-          key: 'TableSchema'
+          dataIndex: 'tableSchema',
+          key: 'tableSchema'
         },
         {
           title: '表名',
-          dataIndex: 'TableName',
-          key: 'TableName'
+          dataIndex: 'tableName',
+          key: 'tableName'
         },
         {
           title: '行数',
-          dataIndex: 'TableRows',
-          key: 'TableRows'
+          dataIndex: 'tableRows',
+          key: 'tableRows'
         },
         {
           title: '大小',
@@ -161,30 +161,30 @@ export default {
       highRiskAccountColumns: [
         {
           title: '用户',
-          dataIndex: 'User',
-          key: 'User'
+          dataIndex: 'user',
+          key: 'user'
         },
         {
           title: '主机',
-          dataIndex: 'Host',
-          key: 'Host'
+          dataIndex: 'host',
+          key: 'host'
         }
       ],
       deductionColumns: [
         {
           title: '指标',
-          dataIndex: 'Metric',
-          key: 'Metric'
+          dataIndex: 'metric',
+          key: 'metric'
         },
         {
           title: '扣分',
-          dataIndex: 'Deduction',
-          key: 'Deduction'
+          dataIndex: 'deduction',
+          key: 'deduction'
         },
         {
           title: '说明',
-          dataIndex: 'Message',
-          key: 'Message'
+          dataIndex: 'message',
+          key: 'message'
         }
       ]
     }
@@ -203,116 +203,116 @@ export default {
   },
   methods: {
     instInfoHandle () {
-      getInstInfo(this.inspData.InstId).then(res => {
+      getInstInfo(this.inspData.instId).then(res => {
         this.instData = res.data
       })
     },
     deductionHandle () {
-      getScoreList({ 'InspId': this.inspData.InspId }).then(res => {
+      getScoreList({ 'InspId': this.inspData.inspId }).then(res => {
         this.deductionData = res.data
       })
     },
     inspDetailHandle () {
-      getInspDetail(this.inspData.InspId).then(res => {
+      getInspDetail(this.inspData.inspId).then(res => {
         const resData = res.data
         for (const i in resData) {
-          if (resData[i].Result === null || resData[i].Result.length === 0) continue
-          switch (resData[i].Metric) {
+          if (resData[i].result === null || resData[i].result.length === 0) continue
+          switch (resData[i].metric) {
             case 'CPU_UTILIZATION':
-              this.serverMetricValue.cpu = resData[i].Result[0].values.map(v => {
+              this.serverMetricValue.cpu = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'cpu': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'MEMORY_UTILIZATION':
-              this.serverMetricValue.memory = resData[i].Result[0].values.map(v => {
+              this.serverMetricValue.memory = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'memory': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'DISK_UTILIZATION':
-              this.serverMetricValue.disk = resData[i].Result[0].values.map(v => {
+              this.serverMetricValue.disk = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'disk': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'IOPS_UTILIZATION':
-              this.serverIOPSMetricValue = resData[i].Result[0].values.map(v => {
+              this.serverIOPSMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'iops': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'DEADLOCK':
-              this.instLockMetricValue.deadlock = resData[i].Result[0].values.map(v => {
+              this.instLockMetricValue.deadlock = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'deadlock': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'LOCK_WAIT':
-              this.instLockMetricValue.lockWait = resData[i].Result[0].values.map(v => {
+              this.instLockMetricValue.lockWait = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'lockWait': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'BIGTABLE_NUM':
-              this.bigtableData = resData[i].Result
+              this.bigtableData = resData[i].result
               break
             case 'NETWORK_TRAFFIC_IN':
-              this.instNetworkMetricValue.in = resData[i].Result[0].values.map(v => {
+              this.instNetworkMetricValue.in = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'in': Number.parseFloat((Number.parseFloat(v[1]) / 1024).toFixed(2)) }
                 return v
               })
               break
             case 'NETWORK_TRAFFIC_OUT':
-              this.instNetworkMetricValue.out = resData[i].Result[0].values.map(v => {
+              this.instNetworkMetricValue.out = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'out': Number.parseFloat((Number.parseFloat(v[1]) / 1024).toFixed(2)) }
                 return v
               })
               break
             case 'SLOW_SQL_NUM':
-              this.instSlowSQLNumMetricValue = resData[i].Result[0].values.map(v => {
+              this.instSlowSQLNumMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'slowSQLNum': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'THREADS_RUNNING_NUM':
-              this.instThreadsRunningMetricValue = resData[i].Result[0].values.map(v => {
+              this.instThreadsRunningMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'threadsRunning': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'THREADS_CONNECTED':
-              this.instThreadsConnectedMetricValue = resData[i].Result[0].values.map(v => {
+              this.instThreadsConnectedMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'threadsConnected': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'IBP_CACHE_HITS_RATE':
-              this.instIbpCacheMetricValue = resData[i].Result[0].values.map(v => {
+              this.instIbpCacheMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'ibpCacheHitsRate': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'QPS':
-              this.instQTpsMetricValue.qps = resData[i].Result[0].values.map(v => {
+              this.instQTpsMetricValue.qps = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'qps': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'TPS':
-              this.instQTpsMetricValue.tps = resData[i].Result[0].values.map(v => {
+              this.instQTpsMetricValue.tps = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'tps': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
               break
             case 'HIGH_RISK_ACCOUNT':
-              this.highRiskAccountData = resData[i].Result
+              this.highRiskAccountData = resData[i].result
               break
             case 'REPLICATION_STATUS':
-              this.instReplStatusMetricValue = resData[i].Result
+              this.instReplStatusMetricValue = resData[i].result
               break
             case 'REPLICATION_DELAY':
-              this.instReplDelayMetricValue = resData[i].Result[0].values.map(v => {
+              this.instReplDelayMetricValue = resData[i].result[0].values.map(v => {
                 v = { 'time': moment.unix(v[0]).format('HH:mm:ss'), 'replDelay': Number.parseFloat(Number.parseFloat(v[1]).toFixed(2)) }
                 return v
               })
@@ -395,8 +395,8 @@ export default {
       })
     },
     resetInitData () {
-      this.inspData = { InspId: null }
-      this.instData = { InstId: null, Name: null }
+      this.inspData = { inspId: null }
+      this.instData = { instId: null, name: null }
       this.serverMetricLineData = [ { time: '-', cpu: 0, memory: 0, disk: 0 } ]
       this.serverMetricScale = [ { dataKey: 'time', tickCount: 12 } ]
       this.serverIOPSMetricLineData = [ { time: '-', iops: 0 } ]

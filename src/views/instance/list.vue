@@ -61,6 +61,11 @@
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
+        <span slot="envType" slot-scope="envType">
+          <a-tag :color="envType | envTypeColorFilter">
+            {{ envType | envTypeFilter }}
+          </a-tag>
+        </span>
         <span slot="action" slot-scope="text, record">
           <template>
             <a v-action:edit @click="handleEdit(record)">修改</a>
@@ -117,7 +122,8 @@ const columns = [
   },
   {
     title: '环境',
-    dataIndex: 'envType'
+    dataIndex: 'envType',
+    scopedSlots: { customRender: 'envType' }
   },
   {
     title: '实例版本',
@@ -183,6 +189,24 @@ export default {
     }
   },
   filters: {
+    envTypeFilter (envType) {
+      const envTypeMap = {
+        'dev': '开发',
+        'test': '测试',
+        'pre': '预发',
+        'prod': '生产'
+      }
+      return envTypeMap[envType]
+    },
+    envTypeColorFilter (envType) {
+      const envTypeColorMap = {
+        'dev': 'blue',
+        'test': 'blue',
+        'pre': 'green',
+        'prod': 'orange'
+      }
+      return envTypeColorMap[envType]
+    }
   },
   created () {
   },
