@@ -99,7 +99,7 @@ export default {
       confirmLoading: false,
       mdl: {},
       allRoles: [],
-      serialNumber: 1
+      serialNumber: 0
     }
   },
   beforeCreate () {
@@ -117,6 +117,7 @@ export default {
     edit (record) {
       this.loadProjRole()
       this.mdl = Object.assign({}, record)
+      debugger
 
       this.form.setFieldsValue({
         'id': this.mdl.id,

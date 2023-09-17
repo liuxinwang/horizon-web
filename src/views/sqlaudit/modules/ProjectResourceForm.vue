@@ -20,7 +20,6 @@
             mode="multiple"
             v-decorator="[
               'datasources',
-              {initialValue: []},
               { rules: [{ required: true, message: '请选择实例' }] },
             ]"
           >
@@ -138,7 +137,7 @@ export default {
     this.form = this.$form.createForm(this)
     this.form.getFieldDecorator('projId', { initialValue: '', preserve: true })
     this.form.getFieldDecorator('name', { initialValue: '', preserve: true })
-    this.form.getFieldDecorator('workflowTemplateCode', { initialValue: '', preserve: true })
+    this.form.getFieldDecorator('workflowTemplateCode', { initialValue: null, preserve: true })
     this.form.getFieldDecorator('keys', { initialValue: [], preserve: true })
     this.form.getFieldDecorator('projectUsers', { initialValue: [], preserve: true })
     this.form.getFieldDecorator('datasources', { initialValue: [], preserve: true })
@@ -158,7 +157,7 @@ export default {
       this.form.setFieldsValue({
         'projId': this.mdl.projId,
         'name': this.mdl.name,
-        'workflowTemplateCode': this.mdl.workflowTemplateCode,
+        'workflowTemplateCode': this.mdl.workflowTemplateCode === 0 ? null : this.mdl.workflowTemplateCode,
         'projectUsers': this.mdl.projectUsers,
         'datasources': this.mdl.projectDatasources.map(item => { return item.instId })
       })
