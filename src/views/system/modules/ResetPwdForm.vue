@@ -24,7 +24,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['uerName', 'newPassword']
+const fields = ['userName', 'newPassword']
 
 export default {
   props: {
