@@ -117,7 +117,6 @@ export default {
     edit (record) {
       this.loadProjRole()
       this.mdl = Object.assign({}, record)
-      debugger
 
       this.form.setFieldsValue({
         'id': this.mdl.id,

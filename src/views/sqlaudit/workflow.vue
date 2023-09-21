@@ -49,7 +49,7 @@
         </span>
         <span slot="status" slot-scope="status">
           <a-tag
-            :color="status === 'PendingAudit' ? 'blue' : status === 'PendingExecution' ? 'cyan' : status === 'Rejected' ? 'red' : status === 'Canceled' ? 'purple' : status === 'Executing' ? 'blue' : status === 'ExecutionFailed' ? 'pink' : status === 'Finished' ? 'green' : 'pink'"
+            :color="status === 'PendingAudit' ? 'blue' : status === 'PendingExecution' ? 'cyan' : status === 'ScheduledExecution' ? 'cyan' : status === 'Rejected' ? 'red' : status === 'Canceled' ? 'purple' : status === 'Executing' ? 'blue' : status === 'ExecutionFailed' ? 'pink' : status === 'Finished' ? 'green' : 'pink'"
           >
             {{ status | statusName }}
           </a-tag>
@@ -182,7 +182,7 @@ export default {
       },
       selectedRowKeys: [],
       selectedRows: [],
-      workflowStatus: ['PendingAudit', 'PendingExecution', 'Rejected', 'Canceled', 'Executing', 'ExecutionFailed', 'Finished']
+      workflowStatus: ['PendingAudit', 'PendingExecution', 'ScheduledExecution', 'Rejected', 'Canceled', 'Executing', 'ExecutionFailed', 'Finished']
     }
   },
   filters: {
@@ -192,6 +192,8 @@ export default {
           return '待审核'
         case 'PendingExecution':
           return '待执行'
+        case 'ScheduledExecution':
+          return '定时执行'
         case 'Rejected':
           return '驳回'
         case 'Canceled':

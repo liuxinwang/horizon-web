@@ -19,6 +19,7 @@
             {{ workflowInfo.sqlContentPreview }}...
           </a-tooltip>
         </a-descriptions-item>
+        <a-descriptions-item label="定时时间">{{ workflowInfo.scheduledAt }}</a-descriptions-item>
       </a-descriptions>
       <a-divider style="margin-bottom: 32px"/>
 
@@ -124,7 +125,7 @@
             type="primary"
             ghost
             class="optBtnClass"
-            hidden>定时执行</a-button>
+            @click="handleTimesExecution()">定时执行</a-button>
           <a-button
             v-show="btnOptPerm.isCanCanceled"
             :disabled="btnOptPerm.isCanCanceledDisabled"
@@ -139,6 +140,30 @@
             @click="handleReModify()">重新修改</a-button>
         </a-form-model-item>
       </a-form-model>
+
+      <!-- times modal -->
+      <a-modal
+        title="定时执行SQL"
+        :visible="timesVisible"
+        :confirm-loading="timesConfirmLoading"
+        @ok="handleTimesOk"
+        @cancel="handleTimesCancel"
+      >
+        <a-form-model ref="timesForm" :model="timesForm" :rules="timsRules">
+          <a-form-model-item required prop="timesDateTime">
+            <a-date-picker
+              v-model="timesForm.timesDateTime"
+              format="YYYY-MM-DD HH:mm:ss"
+              :disabled-date="disabledDate"
+              :disabled-time="disabledDateTime"
+              placeholder="请选择执行时间"
+              show-time
+              type="date"
+              style="width: 100%;"
+            />
+          </a-form-model-item>
+        </a-form-model>
+      </a-modal>
     </a-card>
   </page-header-wrapper>
 </template>
@@ -147,7 +172,8 @@
 import storage from 'store'
 import { USER_NAME, NICK_NAME } from '@/store/mutation-types'
 import { STable, Ellipsis } from '@/components'
-import { getWorkflowInfo, getWorkflowProgress, auditWorkflow, cancelWorkflow, executeWorkflow, getWorkflowSqlDetail } from '@/api/sqlaudit/workflow'
+import { getWorkflowInfo, getWorkflowProgress, auditWorkflow, cancelWorkflow, executeWorkflow, getWorkflowSqlDetail, executeTimesWorkflow } from '@/api/sqlaudit/workflow'
+import moment from 'moment'
 
 export default {
   components: {
@@ -264,6 +290,14 @@ export default {
         workflowId: '',
         remarks: '',
         auditStatus: ''
+      },
+      timesVisible: false,
+      timesConfirmLoading: false,
+      timesForm: {
+        timesDateTime: undefined
+      },
+      timsRules: {
+        timesDateTime: [{ required: true, message: '请输入执行时间', trigger: 'change' }]
       }
     }
   },
@@ -272,6 +306,7 @@ export default {
       const statusMap = {
         'PendingAudit': '待审核',
         'PendingExecution': '待执行',
+        'ScheduledExecution': '定时执行',
         'Rejected': '驳回',
         'Canceled': '取消',
         'Executing': '执行中',
@@ -284,6 +319,7 @@ export default {
       const statusColorMap = {
         'PendingAudit': 'blue',
         'PendingExecution': 'cyan',
+        'ScheduledExecution': 'cyan',
         'Rejected': 'red',
         'Canceled': 'purple',
         'Executing': 'blue',
@@ -304,6 +340,7 @@ export default {
   computed: {
   },
   methods: {
+    moment,
     async handleInitData () {
       await this.handleGetWorkflowInfo()
       await this.handleWorkflowProgress()
@@ -355,9 +392,10 @@ export default {
             }
           })
           break
-        case 'PendingExecution':
+        case 'PendingExecution': case 'ScheduledExecution':
           if (this.workflowInfo.userName === this.currentUser.userName) {
             this.btnOptPerm.isCanExecution = true
+            this.btnOptPerm.isCanTimesExecution = true
             this.btnOptPerm.isCanCanceled = true
           }
           break
@@ -423,6 +461,7 @@ export default {
     handleCanceled () {
       this.btnOptPerm.isCanCanceledLoading = true
       this.btnOptPerm.isCanExecutionDisabled = true
+      this.btnOptPerm.isCanTimesExecutionDisabled = true
       cancelWorkflow(this.workflowInfo).then(res => {
         if (res.code === 1) {
           this.currentStep = 0
@@ -431,43 +470,101 @@ export default {
           this.btnOptPerm.isCanCanceledLoading = false
           this.btnOptPerm.isCanExecution = false
           this.btnOptPerm.isCanExecutionDisabled = false
+          this.btnOptPerm.isCanTimesExecution = false
+          this.btnOptPerm.isCanTimesExecutionDisabled = false
         } else {
           this.$message.error(res.err)
           this.btnOptPerm.isCanCanceledLoading = false
           this.btnOptPerm.isCanExecutionDisabled = false
+          this.btnOptPerm.isCanTimesExecutionDisabled = false
         }
       }).catch((e) => {
         console.log(e)
         this.btnOptPerm.isCanCanceledLoading = false
-          this.btnOptPerm.isCanExecutionDisabled = false
+        this.btnOptPerm.isCanExecutionDisabled = false
+        this.btnOptPerm.isCanTimesExecutionDisabled = false
       })
     },
     handleExecution () {
       this.btnOptPerm.isCanExecutionLoading = true
+      this.btnOptPerm.isCanTimesExecutionDisabled = true
       this.btnOptPerm.isCanCanceledDisabled = true
       executeWorkflow(this.workflowInfo).then(res => {
-        if (res.code === 1) {
-          this.handleGetWorkflowInfo()
-          this.btnOptPerm.isCanExecution = false
-          this.btnOptPerm.isCanExecutionLoading = false
-          this.btnOptPerm.isCanCanceled = false
-          this.btnOptPerm.isCanCanceledDisabled = false
-        } else {
-          this.currentStep = 0
-          this.handleInitData()
-          this.$message.error(res.err)
-          this.btnOptPerm.isCanExecution = false
-          this.btnOptPerm.isCanExecutionLoading = false
-          this.btnOptPerm.isCanCanceled = false
-          this.btnOptPerm.isCanCanceledDisabled = false
-        }
-        // refresh workflowSqlDetail
-        this.$refs.auditDetailTable.refresh(true)
-      }).catch((e) => {
-        console.log(e)
         this.btnOptPerm.isCanExecutionLoading = false
-          this.btnOptPerm.isCanCanceledDisabled = false
+        this.btnOptPerm.isCanTimesExecutionDisabled = false
+        this.btnOptPerm.isCanCanceledDisabled = false
       })
+    },
+    handleTimesExecution () {
+      this.timesVisible = true
+    },
+    disabledDate (current) {
+      // Can not select days before today and today
+      return current && current < moment().subtract(1, 'days')
+    },
+    disabledDateTime (current) {
+      const nowDate = this.moment().add(5, 'minutes')
+      const hours = nowDate.hours() // 0~23
+      const minutes = nowDate.minutes() // 0~59
+      // const seconds = nowDate.seconds() // 0~59
+      // 当日只能选择当前时间之后的时间点
+      if (current && moment(current).date() === moment().date()) {
+        if (hours < moment(current).hour()) {
+          return {
+            disabledHours: () => this.range(0, hours),
+            disabledMinutes: () => this.range(0, 0),
+            disabledSeconds: () => this.range(0, 0)
+          }
+        } else {
+          return {
+            disabledHours: () => this.range(0, hours),
+            disabledMinutes: () => this.range(0, minutes),
+            disabledSeconds: () => this.range(0, 0)
+          }
+        }
+      } else {
+        return {
+          disabledHours: () => this.range(0, 0),
+          disabledMinutes: () => this.range(0, 0),
+          disabledSeconds: () => this.range(0, 0)
+        }
+      }
+    },
+    range (start, end) {
+      const result = []
+      for (let i = start; i < end; i++) {
+        result.push(i)
+      }
+      return result
+    },
+    handleTimesOk () {
+      this.$refs.timesForm.validate(valid => {
+        this.timesConfirmLoading = true
+        if (valid) {
+          this.workflowInfo.scheduledAt = this.timesForm.timesDateTime.format('YYYY-MM-DDTHH:mm:ss.sssZ')
+          executeTimesWorkflow(this.workflowInfo).then(res => {
+            if (res.code === 1) {
+              this.timesVisible = false
+              this.timesConfirmLoading = false
+              this.$message.info('定时成功')
+            } else {
+              this.$message.error(res.err)
+              this.timesConfirmLoading = false
+            }
+          }).catch((e) => {
+            this.timesConfirmLoading = false
+            console.log(e)
+          })
+        } else {
+          this.timesConfirmLoading = false
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    handleTimesCancel () {
+      this.timesVisible = false
+      this.$refs.timesForm.resetFields()
     },
     handleReModify () {
       this.$router.push({

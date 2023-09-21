@@ -73,3 +73,11 @@ export function getWorkflowSqlDetail (parameter) {
     params: parameter
   })
 }
+
+export function executeTimesWorkflow (parameter) {
+  return request({
+    url: '/sqlaudit/workflow/scheduledExecute',
+    method: 'post',
+    data: parameter
+  })
+}
