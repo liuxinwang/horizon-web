@@ -490,6 +490,28 @@ export default {
       this.btnOptPerm.isCanTimesExecutionDisabled = true
       this.btnOptPerm.isCanCanceledDisabled = true
       executeWorkflow(this.workflowInfo).then(res => {
+        if (res.code === 1) {
+          this.btnOptPerm.isCanExecution = false
+          this.btnOptPerm.isCanExecutionLoading = false
+          this.btnOptPerm.isCanTimesExecution = false
+          this.btnOptPerm.isCanTimesExecutionDisabled = false
+          this.btnOptPerm.isCanCanceled = false
+          this.btnOptPerm.isCanCanceledDisabled = false
+          this.$message.success(res.msg)
+        } else {
+          this.$message.error(res.err)
+          this.btnOptPerm.isCanExecution = false
+          this.btnOptPerm.isCanExecutionLoading = false
+          this.btnOptPerm.isCanTimesExecution = false
+          this.btnOptPerm.isCanTimesExecutionDisabled = false
+          this.btnOptPerm.isCanCanceled = false
+          this.btnOptPerm.isCanCanceledDisabled = false
+        }
+        this.currentStep = 0
+        this.handleInitData()
+        this.$refs.auditDetailTable.refresh()
+      }).catch((e) => {
+        console.log(e)
         this.btnOptPerm.isCanExecutionLoading = false
         this.btnOptPerm.isCanTimesExecutionDisabled = false
         this.btnOptPerm.isCanCanceledDisabled = false
