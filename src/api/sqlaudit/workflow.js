@@ -20,7 +20,7 @@ export function getWorkflowInfo (parameter) {
 // ProjId != 0 update  put
 export function saveWorkflow (parameter) {
   return request({
-    url: '/sqlaudit/workflow',
+    url: parameter.id === 0 ? '/sqlaudit/workflow/add' : '/sqlaudit/workflow/edit',
     method: parameter.id === 0 ? 'post' : 'put',
     data: parameter
   })

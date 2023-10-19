@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getUserList (parameter) {
   return request({
-    url: '/user',
+    url: '/user/query',
     method: 'get',
     params: parameter
   })
@@ -12,7 +12,7 @@ export function getUserList (parameter) {
 // InstId != 0 update  put
 export function saveUser (parameter) {
   return request({
-    url: '/user',
+    url: parameter.ID === '' ? '/user/add' : '/user/edit',
     method: parameter.ID === '' ? 'post' : 'put',
     data: parameter
   })

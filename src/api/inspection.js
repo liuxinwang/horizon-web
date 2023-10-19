@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getInspList (parameter) {
   return request({
-    url: '/inspection',
+    url: '/inspection/query',
     method: 'get',
     params: parameter
   })

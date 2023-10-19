@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getInstList (parameter) {
   return request({
-    url: '/instance',
+    url: '/instance/query',
     method: 'get',
     params: parameter
   })
@@ -20,7 +20,7 @@ export function getInstInfo (parameter) {
 // InstId != 0 update  put
 export function saveInst (parameter) {
   return request({
-    url: '/instance',
+    url: parameter.instId === '' ? '/instance/add' : '/instance/edit',
     method: parameter.instId === '' ? 'post' : 'put',
     data: parameter
   })
@@ -28,7 +28,7 @@ export function saveInst (parameter) {
 
 export function deleteInst (parameter) {
   return request({
-    url: '/instance/' + parameter,
+    url: '/instance/delete/' + parameter,
     method: 'delete',
     data: parameter
   })
