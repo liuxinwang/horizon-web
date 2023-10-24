@@ -37,7 +37,7 @@
           </a-select>
         </a-form-item>
         <a-form-item label="Ip地址">
-          <a-input v-decorator="['ip', {rules: [{required: true, min: 7, max: 20, message: '请输入7到20个字符的Ip地址！'}]}]" />
+          <a-input v-decorator="['ip', {rules: [{required: true, min: 7, max: 255, message: '请输入7到255个字符的Ip地址！'}]}]" />
         </a-form-item>
         <a-form-item label="端口号">
           <a-input-number style="width: 100%" v-decorator="['port', {rules: [{required: true, type: 'number', min: 1000, max: 65535, message: '请输入1000-65535之间的端口号！'}]}]" />

@@ -7,7 +7,7 @@
     </template>
     <template v-slot:copyright>
       <a href="https://github.com/liuxinwang/horizon" target="_blank">
-        GitHub Horizon v0.5.3
+        GitHub Horizon v0.5.4
       </a>
     </template>
   </global-footer>

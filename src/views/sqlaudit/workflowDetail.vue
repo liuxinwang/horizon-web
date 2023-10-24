@@ -298,7 +298,8 @@ export default {
       },
       timsRules: {
         timesDateTime: [{ required: true, message: '请输入执行时间', trigger: 'change' }]
-      }
+      },
+      timer: ''
     }
   },
   filters: {
@@ -339,9 +340,13 @@ export default {
   },
   computed: {
   },
+  beforeDestroy () {
+    clearInterval(this.timer)
+  },
   methods: {
     moment,
     async handleInitData () {
+      this.currentStep = 0
       await this.handleGetWorkflowInfo()
       await this.handleWorkflowProgress()
       await this.handleBtnOptPerm()
@@ -414,7 +419,6 @@ export default {
       this.auditForm.auditStatus = 'Passed'
       auditWorkflow(this.auditForm).then(res => {
         if (res.code === 1) {
-          this.currentStep = 0
           this.handleInitData()
           this.btnOptPerm.isCanAudit = false
           this.btnOptPerm.isCanAuditLoading = false
@@ -441,7 +445,6 @@ export default {
       this.auditForm.auditStatus = 'Rejected'
       auditWorkflow(this.auditForm).then(res => {
         if (res.code === 1) {
-          this.currentStep = 0
           this.handleInitData()
           this.btnOptPerm.isCanRejected = false
           this.btnOptPerm.isCanRejectedLoading = false
@@ -464,7 +467,6 @@ export default {
       this.btnOptPerm.isCanTimesExecutionDisabled = true
       cancelWorkflow(this.workflowInfo).then(res => {
         if (res.code === 1) {
-          this.currentStep = 0
           this.handleInitData()
           this.btnOptPerm.isCanCanceled = false
           this.btnOptPerm.isCanCanceledLoading = false
@@ -497,7 +499,27 @@ export default {
           this.btnOptPerm.isCanTimesExecutionDisabled = false
           this.btnOptPerm.isCanCanceled = false
           this.btnOptPerm.isCanCanceledDisabled = false
-          this.$message.success(res.msg)
+          // this.$message.success(res.msg)
+
+          this.handleInitData()
+          this.$refs.auditDetailTable.refresh()
+
+          this.timer = setInterval(() => {
+            this.handleInitData()
+            this.$refs.auditDetailTable.refresh()
+            setTimeout(() => {
+              if (this.workflowInfo.status === 'ExecutionFailed') {
+                clearInterval(this.timer)
+                const statusFilter = this.$options.filters['statusFilter']
+                this.$message.error(statusFilter(this.workflowInfo.status))
+              }
+              if (this.workflowInfo.status === 'Finished') {
+                clearInterval(this.timer)
+                const statusFilter = this.$options.filters['statusFilter']
+                this.$message.success(statusFilter(this.workflowInfo.status))
+              }
+            }, 1000)
+          }, 5000)
         } else {
           this.$message.error(res.err)
           this.btnOptPerm.isCanExecution = false
@@ -507,9 +529,6 @@ export default {
           this.btnOptPerm.isCanCanceled = false
           this.btnOptPerm.isCanCanceledDisabled = false
         }
-        this.currentStep = 0
-        this.handleInitData()
-        this.$refs.auditDetailTable.refresh()
       }).catch((e) => {
         console.log(e)
         this.btnOptPerm.isCanExecutionLoading = false
@@ -597,7 +616,6 @@ export default {
       })
     }
   }
-
 }
 </script>
 

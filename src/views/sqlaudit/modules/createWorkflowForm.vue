@@ -170,7 +170,11 @@ export default {
       this.databaseData = []
       this.form.setFieldsValue({ 'dbName': '' })
       getInstDbs(instId).then(res => {
-        this.databaseData = res.data
+        if (res.code === 1) {
+          this.databaseData = res.data
+        } else {
+          this.$message.error(res.err)
+        }
       })
     },
     onCmCodeChanges (cm, changes) {
