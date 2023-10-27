@@ -19,6 +19,12 @@
             {{ workflowInfo.sqlContentPreview }}...
           </a-tooltip>
         </a-descriptions-item>
+        <a-descriptions-item label="实例名称">{{ workflowInfo.instName }}</a-descriptions-item>
+        <a-descriptions-item label="环境">
+          <a-tag :color="workflowInfo.envType | envTypeColorFilter">
+            {{ workflowInfo.envType | envTypeFilter }}
+          </a-tag>
+        </a-descriptions-item>
         <a-descriptions-item label="定时时间">{{ workflowInfo.scheduledAt }}</a-descriptions-item>
       </a-descriptions>
       <a-divider style="margin-bottom: 32px"/>
@@ -328,6 +334,24 @@ export default {
         'Finished': 'green'
       }
       return statusColorMap[status]
+    },
+    envTypeFilter (envType) {
+      const envTypeMap = {
+        'dev': '开发',
+        'test': '测试',
+        'pre': '预发',
+        'prod': '生产'
+      }
+      return envTypeMap[envType]
+    },
+    envTypeColorFilter (envType) {
+      const envTypeColorMap = {
+        'dev': 'blue',
+        'test': 'blue',
+        'pre': 'green',
+        'prod': 'orange'
+      }
+      return envTypeColorMap[envType]
     }
   },
   created () {

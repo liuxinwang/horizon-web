@@ -54,6 +54,11 @@
             {{ status | statusName }}
           </a-tag>
         </span>
+        <span slot="envType" slot-scope="envType">
+          <a-tag :color="envType | envTypeColorFilter">
+            {{ envType | envTypeFilter }}
+          </a-tag>
+        </span>
         <span slot="action" slot-scope="text, record">
           <template v-if="record.status === 'ExecutionFailed'">
             <a v-action:edit @click="handleEdit(record)">重新修改</a>
@@ -124,6 +129,11 @@ const columns = [
   {
     title: '实例名称',
     dataIndex: 'instName'
+  },
+  {
+    title: '环境',
+    dataIndex: 'envType',
+    scopedSlots: { customRender: 'envType' }
   },
   {
     title: '数据库名称',
@@ -207,6 +217,24 @@ export default {
         default:
           return status
       }
+    },
+    envTypeFilter (envType) {
+      const envTypeMap = {
+        'dev': '开发',
+        'test': '测试',
+        'pre': '预发',
+        'prod': '生产'
+      }
+      return envTypeMap[envType]
+    },
+    envTypeColorFilter (envType) {
+      const envTypeColorMap = {
+        'dev': 'blue',
+        'test': 'blue',
+        'pre': 'green',
+        'prod': 'orange'
+      }
+      return envTypeColorMap[envType]
     }
   },
   created () {
