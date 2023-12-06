@@ -18,6 +18,10 @@ export default {
     'menu.system': '系统管理',
     'menu.system.user': '用户管理',
     'menu.system.role': '角色管理',
+    'menu.configcenter': '配置中心',
+    'menu.configcenter.instance': '实例列表',
+    'menu.configcenter.config': '配置列表',
+
     'menu.form': '表单页',
     'menu.form.basic-form': '基础表单',
     'menu.form.step-form': '分步表单',
