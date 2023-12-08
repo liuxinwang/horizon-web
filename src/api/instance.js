@@ -41,3 +41,11 @@ export function getInstDbs (parameter) {
     params: parameter
   })
 }
+
+export function getInstDbTables (parameter) {
+  return request({
+    url: '/instance/db/table',
+    method: 'get',
+    params: parameter
+  })
+}

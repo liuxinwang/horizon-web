@@ -36,7 +36,11 @@ const constantRouterComponents = {
 
   // 'TestWork': () => import(/* webpackChunkName: "TestWork" */ '@/views/dashboard/TestWork')
   ConfigCenterInstanceList: () => import('@/views/configcenter/instance'),
-  ConfigCenterConfigList: () => import('@/views/configcenter/config')
+  ConfigCenterConfigList: () => import('@/views/configcenter/config'),
+
+  DataManagerDataMigrateJob: () => import('@/views/dataManager/dataMigrateJob'),
+  DataManagerDataMigrateJobList: () => import('@/views/dataManager/dataMigrateJob'),
+  DataManagerDataMigrateJobDetail: () => import('@/views/dataManager/dataMigrateJobDetail')
 }
 
 // 前端未找到页面路由（固定不用改）

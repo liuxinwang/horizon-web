@@ -21,6 +21,10 @@ export default {
     'menu.configcenter': '配置中心',
     'menu.configcenter.instance': '实例列表',
     'menu.configcenter.config': '配置列表',
+    'menu.datamanager': '数据管理',
+    'menu.datamanager.dataMigrateJob': '数据迁移',
+    'menu.datamanager.dataMigrateJob.list': '迁移列表',
+    'menu.datamanager.dataMigrateJob.detail': '迁移详情',
 
     'menu.form': '表单页',
     'menu.form.basic-form': '基础表单',
