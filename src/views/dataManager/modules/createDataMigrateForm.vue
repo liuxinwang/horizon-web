@@ -64,6 +64,11 @@
             </a-select-option>
           </a-select>
         </a-form-item>
+        <a-form-item label="迁移模式">
+          <a-radio-group v-model="migrateMode">
+            <a-radio :value="1">重命名目标对象（警告：并自动创建同源对象一致的结构进行数据迁移）</a-radio>
+          </a-radio-group>
+        </a-form-item>
       </a-form>
     </a-spin>
   </a-modal>
@@ -112,7 +117,8 @@ export default {
       sourceDatabaseData: [],
       sourceDatabaseTablesData: [],
       targetDatasourceData: [],
-      targetDatabaseData: []
+      targetDatabaseData: [],
+      migrateMode: 1
     }
   },
   mounted () {
